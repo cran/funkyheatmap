@@ -23,7 +23,7 @@ NULL
 #' @importFrom dplyr case_when transmute slice left_join inner_join n bind_cols
 #' @importFrom dplyr bind_rows rename summarise arrange desc first last distinct
 #' @importFrom dplyr slice_head
-#' @importFrom tidyr crossing gather
+#' @importFrom tidyr crossing gather unnest
 #' @importFrom purrr %>% %||% walk set_names map map_dbl map_lgl map_chr map_df
 #' @importFrom purrr map2 map2_dbl map2_lgl map2_chr map2_df pmap_df pmap
 #' @importFrom stringr str_count str_to_title
@@ -31,6 +31,7 @@ NULL
 #' @importFrom utils head tail
 #' @importFrom stats na.omit
 #' @importFrom cli cli_alert_warning cli_alert_info
+#' @importFrom Rdpack reprompt
 #' @import ggplot2
 #'
 #' @docType package

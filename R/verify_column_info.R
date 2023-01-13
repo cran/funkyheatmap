@@ -31,11 +31,26 @@ verify_column_info <- function(column_info, data) {
     is.character(column_info$id) | is.factor(column_info$id),
     all(column_info$id %in% colnames(data))
   )
+  
+  # checking options
+  if (column_info %has_name% "options") {
+    if (is.character(column_info$options)) {
+      cli_alert_info("Detected json in the options column, parsing.")
+      column_info$options <- map(column_info$options, jsonlite::fromJSON)
+    }
+    column_info <- column_info %>%
+      mutate(options = map(options, function(x) {
+        optdf <- if (is.null(x) || length(x) == 0) tibble(a = 1)[,-1] else as_tibble(x)
+        assert_that(nrow(optdf) == 1, msg = paste0("Trying to convert: ", as.character(x)))
+        optdf
+      })) %>%
+      unnest(cols = "options")
+  }
 
   # checking name
   if (!column_info %has_name% "name") {
     cli_alert_info("Column info did not contain column `name`, using `id` to generate it.")
-    column_info$name <- stringr::str_to_title(column_info$id)
+    column_info$name <- stringr::str_to_title(gsub("_", " ", column_info$id))
   }
   assert_that(
     is.character(column_info$name) | is.factor(column_info$name)
@@ -81,21 +96,38 @@ verify_column_info <- function(column_info, data) {
     is.character(column_info$palette) | is.factor(column_info$palette)
   )
 
-  # checking options
-  if (!column_info %has_name% "options") {
-    cli_alert_info("Column info did not contain a column called 'options', generating ptions based on the 'geom' column.")
-    # column_info$options <- map(seq_len(nrow(column_info)), function(x) list())
-    column_info$options <- pmap(column_info, function(geom, ...) {
-      if (geom == "text") {
-        list(width = 6)
-      } else {
-        list()
-      }
-    })
+  # checking width
+  if (!column_info %has_name% "width") {
+    cli_alert_info("Column info did not contain a column called 'width', generating options based on the 'geom' column.")
+    column_info <- column_info %>% mutate(
+      width = case_when(
+        .data$geom == "text" ~ 6,
+        .data$geom == "bar" ~ 4,
+        TRUE ~ 1
+      )
+    )
   }
   assert_that(
-    is.list(column_info$options),
-    all(map_lgl(column_info$options, is.list))
+    is.numeric(column_info$width)
+  )
+  column_info$width[is.na(column_info$width)] <- 1
+  
+  # checking overlay
+  if (!column_info %has_name% "overlay") {
+    column_info$overlay <- FALSE
+  }
+  assert_that(
+    is.logical(column_info$overlay)
+  )
+  column_info$overlay[is.na(column_info$overlay)] <- FALSE
+  
+  # checking legend
+  if (!column_info %has_name% "legend") {
+    cli_alert_info("Column info did not contain a column called 'legend', generating options based on the 'geom' column.")
+    column_info <- column_info %>% mutate(legend = .data$geom != "text")
+  }
+  assert_that(
+    is.logical(column_info$legend)
   )
 
   column_info
