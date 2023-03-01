@@ -14,7 +14,7 @@ funky_heatmap(
   scale_column = TRUE,
   add_abc = TRUE,
   col_annot_offset = 3,
-  row_annot_offset = 0.5,
+  col_annot_angle = 30,
   removed_entries = NULL,
   expand = c(xmin = 0, xmax = 2, ymin = 0, ymax = 0)
 )
@@ -107,7 +107,7 @@ columns groups.}
 
 \item{col_annot_offset}{How much the column annotation will be offset by.}
 
-\item{row_annot_offset}{How much the row annotation will be offset by.}
+\item{col_annot_angle}{The angle of the column annotation labels.}
 
 \item{removed_entries}{Which methods to not show in the rows. Missing methods
 are replaced by a "Not shown" label.}
@@ -125,11 +125,11 @@ columns and rows, which allows assigning multiple palettes or geometries
 or grouping rows and columns together in categories.
 }
 \examples{
-library(dplyr, warn.conflicts = FALSE)
 library(tibble, warn.conflicts = FALSE)
 
 data("mtcars")
 
-data <- mtcars \%>\%
-  rownames_to_column("id")
+data <- rownames_to_column(mtcars, "id")
+
+funky_heatmap(data)
 }

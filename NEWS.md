@@ -1,3 +1,20 @@
+# funkyheatmap 0.3.0
+
+## MAJOR CHANGES
+
+* Funky rectangles are now plotted using `geom_rounded_rect()`, thus simplifying the code quite a bit.
+
+## MINOR CHANGES
+
+* Added a parameter for allowing to change the angle of the column annotation labels,
+  `col_annot_angle`.
+
+* Removed dynutils as a dependency.
+
+## BREAKING CHANGES
+
+* Removed parameter `row_annot_offset` since it wasn't being used anymore.
+
 # funkyheatmap 0.2.0
 
 ## MAJOR CHANGES

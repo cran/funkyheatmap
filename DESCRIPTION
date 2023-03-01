@@ -5,7 +5,7 @@ Description: Allows generating heatmap-like visualisations for benchmark data
   columns and rows, which allows assigning multiple palettes or geometries
   or grouping rows and columns together in categories.
   Saelens et al. (2019) <doi:10.1038/s41587-019-0071-9>.
-Version: 0.2.0
+Version: 0.3.0
 Authors@R: c(
   person(
     "Robrecht", 
@@ -23,10 +23,9 @@ Authors@R: c(
   ))
 License: MIT + file LICENSE
 Encoding: UTF-8
-RoxygenNote: 7.2.2
-Imports: assertthat, cli, cowplot, dplyr, dynutils, ggforce, ggplot2,
-        grDevices, jsonlite, purrr, RColorBrewer, Rdpack, stringr,
-        tibble, tidyr
+RoxygenNote: 7.2.3
+Imports: assertthat, cli, cowplot, dplyr, ggforce, ggplot2, grDevices,
+        jsonlite, purrr, RColorBrewer, Rdpack, stringr, tibble, tidyr
 Suggests: kableExtra, knitr, rmarkdown, testthat (>= 3.0.0)
 VignetteBuilder: knitr
 RdMacros: Rdpack
@@ -37,10 +36,10 @@ URL: https://funkyheatmap.dynverse.org,
 BugReports: https://github.com/dynverse/funkyheatmap/issues
 Config/testthat/edition: 3
 NeedsCompilation: no
-Packaged: 2023-01-13 08:42:00 UTC; rcannood
+Packaged: 2023-03-01 22:02:27 UTC; rcannood
 Author: Robrecht Cannoodt [aut, cre] (<https://orcid.org/0000-0003-3641-729X>,
     rcannood),
   Wouter Saelens [aut] (<https://orcid.org/0000-0002-7114-6248>, zouter)
 Maintainer: Robrecht Cannoodt <rcannood@gmail.com>
 Repository: CRAN
-Date/Publication: 2023-01-13 09:30:05 UTC
+Date/Publication: 2023-03-01 22:30:02 UTC
