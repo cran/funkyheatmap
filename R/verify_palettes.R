@@ -6,11 +6,11 @@ smear <- function(cols) {
 #' @importFrom RColorBrewer brewer.pal
 default_palettes <- list(
   numerical = list(
-    "Blues" = RColorBrewer::brewer.pal(9, "Blues") %>% c("#011636") %>% rev %>% smear,
-    "Reds" = RColorBrewer::brewer.pal(9, "Reds")[-8:-9] %>% rev %>% smear,
-    "YlOrBr" = RColorBrewer::brewer.pal(9, "YlOrBr")[-7:-9] %>% rev %>% smear,
-    "Greens" = RColorBrewer::brewer.pal(9, "Greens")[-1] %>% c("#00250f") %>% rev %>% smear,
-    "Greys" = RColorBrewer::brewer.pal(9, "Greys")[-1] %>% rev %>% smear
+    "Blues" = RColorBrewer::brewer.pal(9, "Blues") %>% c("#011636") %>% rev() %>% smear(),
+    "Reds" = RColorBrewer::brewer.pal(9, "Reds")[-8:-9] %>% rev() %>% smear(),
+    "YlOrBr" = RColorBrewer::brewer.pal(9, "YlOrBr")[-7:-9] %>% rev() %>% smear(),
+    "Greens" = RColorBrewer::brewer.pal(9, "Greens")[-1] %>% c("#00250f") %>% rev() %>% smear(),
+    "Greys" = RColorBrewer::brewer.pal(9, "Greys")[-1] %>% rev() %>% smear()
   ),
   categorical = list(
     "Set3" = RColorBrewer::brewer.pal(12, "Set3"),
@@ -25,7 +25,7 @@ default_palettes <- list(
 #' @inheritParams funky_heatmap
 #'
 #' @returns The palettes object with all expected columns.
-#' 
+#'
 #' @export
 #'
 #' @examples
@@ -88,10 +88,12 @@ verify_palettes <- function(palettes, column_info, data) {
   for (palette_id in col_info_palettes) {
     if (!palettes %has_name% palette_id) {
       # take one of the columns with this palette
-      columns <- column_info %>% filter(.data$palette == !!palette_id) %>% slice_head()
-      
+      columns <- column_info %>%
+        filter(.data$palette == !!palette_id) %>%
+        slice_head()
+
       # try to determine palette type (numerical or categorical)
-      palette_type <- 
+      palette_type <-
         if (columns$geom == "pie") {
           "categorical"
         } else if (is.numeric(data[[columns$id]])) {
@@ -110,7 +112,7 @@ verify_palettes <- function(palettes, column_info, data) {
         counter <- 1
       }
       rotation_counter[[palette_type]] <- counter
-      
+
       cli_alert_info("Palette named '{palette_id}' was not defined. Assuming palette is {palette_type}. Automatically selected palette '{palette_name}'.")
 
       # assigning palette
@@ -124,7 +126,27 @@ verify_palettes <- function(palettes, column_info, data) {
       if (default_palettes$numerical %has_name% pal_value) {
         pal_value <- default_palettes$numerical[[pal_value]]
       } else if (default_palettes$categorical %has_name% pal_value) {
-        pal_value <- default_palettes$categorical[[pal_value]]
+        columns <- column_info %>%
+          filter(.data$palette == !!palette_id)
+
+        categories_per_column <- pmap(columns, function(id, geom, ...) {
+          dat <- if (geom == "pie") lapply(data[[id]], names) else data[[id]]
+          unique(unlist(dat))
+        })
+
+        categories <- unique(unlist(categories_per_column))
+        pal_values <- default_palettes$categorical[[pal_value]]
+
+        assert_that(
+          length(pal_values) >= length(categories), 
+          msg = paste0(
+            "Number of categories for palette '", palette_id, "' exceeds number of available colours in specified palette name '", pal_value, "'. ",
+            "Please specify a different palette or specify the palette manually."
+          )
+        )
+
+        pal_value <- pal_values[seq_along(categories)]
+        names(pal_value) <- categories
       }
     }
     palettes[[palette_id]] <- pal_value

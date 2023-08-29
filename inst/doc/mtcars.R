@@ -14,10 +14,11 @@ library(purrr, warn.conflicts = FALSE)
 
 data("mtcars")
 
-data <- mtcars %>% 
+data <- mtcars %>%
   rownames_to_column("id") %>%
   arrange(desc(mpg)) %>%
-  head(20)
+  head(20) %>%
+  mutate(type = c(rep("images/ice.png", 10), rep("images/electric.png", 10)))
 
 ## -----------------------------------------------------------------------------
 funky_heatmap(data)
@@ -36,7 +37,8 @@ column_info <- tribble(
   "vs",    "group2",       "Engine",                   "circle",     "palette2",  lst(),
   "am",    "group2",       "Transmission",             "circle",     "palette2",  lst(),
   "gear",  "group2",       "# Forward gears",          "circle",     "palette2",  lst(),
-  "carb",  "group2",       "# Carburetors",            "circle",     "palette2",  lst()
+  "carb",  "group2",       "# Carburetors",            "circle",     "palette2",  lst(),
+  "type",  "group2",       "Type of engine",           "image",      NA,          lst()
 )
 
 ## ----column-groups------------------------------------------------------------
@@ -67,7 +69,7 @@ g <- funky_heatmap(
   row_info = row_info,
   row_groups = row_groups,
   palettes = palettes,
-  expand = list(xmax = 4)
+  position_args = position_arguments(expand_xmax = 4)
 )
 
 ## ----include=FALSE------------------------------------------------------------

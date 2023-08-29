@@ -3,9 +3,9 @@
 #' @inheritParams funky_heatmap
 #'
 #' @returns The column info object with all expected columns.
-#' 
+#'
 #' @export
-#' 
+#'
 #' @examples
 #' library(tibble)
 #' data <- tribble(
@@ -31,7 +31,7 @@ verify_column_info <- function(column_info, data) {
     is.character(column_info$id) | is.factor(column_info$id),
     all(column_info$id %in% colnames(data))
   )
-  
+
   # checking options
   if (column_info %has_name% "options") {
     if (is.character(column_info$options)) {
@@ -40,7 +40,7 @@ verify_column_info <- function(column_info, data) {
     }
     column_info <- column_info %>%
       mutate(options = map(options, function(x) {
-        optdf <- if (is.null(x) || length(x) == 0) tibble(a = 1)[,-1] else as_tibble(x)
+        optdf <- if (is.null(x) || length(x) == 0) tibble(a = 1)[, -1] else as_tibble(x)
         assert_that(nrow(optdf) == 1, msg = paste0("Trying to convert: ", as.character(x)))
         optdf
       })) %>%
@@ -62,19 +62,22 @@ verify_column_info <- function(column_info, data) {
     column_info$geom <- map_chr(data, function(x) {
       case_when(
         is.numeric(x) ~ "funkyrect",
-        is.character(x) | is.factor(x) ~ "text",
+        is.character(x) | is.factor(x) | is.logical(x) ~ "text",
         is.list(x) && map_lgl(x, function(z) is.numeric(z) && !is.null(names(z))) ~ "pie",
         TRUE ~ NA_character_
       )
     })
   }
+  check_geom <-
+    (is.character(column_info$geom) | is.factor(column_info$geom)) &
+    column_info$geom %in% c("funkyrect", "circle", "rect", "bar", "pie", "text", "image")
   assert_that(
-    is.character(column_info$geom) | is.factor(column_info$geom),
-    all(column_info$geom %in% c("funkyrect", "circle", "rect", "bar", "pie", "text"))
+    all(check_geom),
+    msg = paste0("Invalid geom types for columns: '", paste0(column_info$id[!check_geom], collapse = "', '"), "'")
   )
 
   # checking group
-  if (!column_info %has_name% "group") {
+  if (!column_info %has_name% "group" || all(is.na(column_info$group))) {
     cli_alert_info("Column info did not contain group information, assuming columns are ungrouped.")
     column_info$group <- NA_character_
   }
@@ -84,10 +87,11 @@ verify_column_info <- function(column_info, data) {
   column_info$group[column_info$group == ""] <- NA_character_
 
   # checking palette
-  if (!column_info %has_name% "palette") {
+  if (!column_info %has_name% "palette" || all(is.na(column_info$palette))) {
     cli_alert_info("Column info did not contain a column called 'palette', generating palettes based on the 'geom' column.")
     column_info$palette <- case_when(
       column_info$geom == "text" ~ NA_character_,
+      column_info$geom == "image" ~ NA_character_,
       column_info$geom == "pie" ~ "categorical_palette",
       TRUE ~ "numerical_palette"
     )
@@ -111,7 +115,7 @@ verify_column_info <- function(column_info, data) {
     is.numeric(column_info$width)
   )
   column_info$width[is.na(column_info$width)] <- 1
-  
+
   # checking overlay
   if (!column_info %has_name% "overlay") {
     column_info$overlay <- FALSE
@@ -120,7 +124,7 @@ verify_column_info <- function(column_info, data) {
     is.logical(column_info$overlay)
   )
   column_info$overlay[is.na(column_info$overlay)] <- FALSE
-  
+
   # checking legend
   if (!column_info %has_name% "legend") {
     cli_alert_info("Column info did not contain a column called 'legend', generating options based on the 'geom' column.")

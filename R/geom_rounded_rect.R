@@ -1,5 +1,5 @@
 # ported from https://github.com/hrbrmstr/ggchicklet/blob/master/R/a-geom-rect.R
-# changes: 
+# changes:
 #  * moved radius to aes
 #  * changed unit to native
 #  * renamed to `geom_rounded_rect()`
@@ -32,7 +32,7 @@
 #'       fill = z
 #'     ),
 #'     colour = "white"
-#'  )
+#'   )
 geom_rounded_rect <- function(
     mapping = NULL,
     data = NULL,
@@ -41,8 +41,7 @@ geom_rounded_rect <- function(
     ...,
     na.rm = FALSE,
     show.legend = NA,
-    inherit.aes = TRUE
-) {
+    inherit.aes = TRUE) {
   layer(
     data = data,
     mapping = mapping,
@@ -60,41 +59,40 @@ geom_rounded_rect <- function(
 
 GeomRoundedRect <- ggplot2::ggproto(
   "GeomRoundedRect", ggplot2::Geom,
-  
   default_aes = ggplot2::aes(
-    colour = NA, fill = "grey35", size = 0.5, linetype = 1, alpha = NA,
+    colour = NA, fill = "grey35", linewidth = 0.5, linetype = 1, alpha = NA,
     radius = 0.5
   ),
-  
   required_aes = c("xmin", "xmax", "ymin", "ymax", "radius"),
-  
-  draw_panel = function(self, data, panel_params, coord) {
-    
+
+  draw_panel = function(self, data, panel_params, coord, lineend = "butt", linejoin = "mitre") {
     coords <- coord$transform(data, panel_params)
-    
+
     gl <- lapply(seq_along(coords$xmin), function(i) {
       grid::roundrectGrob(
-        coords$xmin[i], coords$ymax[i],
+        x = coords$xmin[i],
+        y = coords$ymax[i],
         width = (coords$xmax[i] - coords$xmin[i]),
-        height = (coords$ymax[i] - coords$ymin)[i],
+        height = (coords$ymax[i] - coords$ymin[i]),
         r = grid::unit(coords$radius[i], "native"),
         default.units = "native",
         just = c("left", "top"),
         gp = grid::gpar(
           col = coords$colour[i],
           fill = alpha(coords$fill[i], coords$alpha[i]),
-          lwd = coords$size[i] * .pt,
+          lwd = coords$linewidth[i] * .pt,
           lty = coords$linetype[i],
-          lineend = "butt"
+          linejoin = linejoin,
+          lineend = lineend
         )
       )
     })
-    
+
     grobs <- do.call(grid::gList, gl)
     grob <- grid::grobTree(children = grobs)
     grob$name <- grid::grobName(grob, "geom_rounded_rect")
     grob
   },
-  draw_key = ggplot2::draw_key_polygon
+  draw_key = ggplot2::draw_key_polygon,
+  rename_size = TRUE
 )
-
