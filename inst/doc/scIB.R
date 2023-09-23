@@ -57,53 +57,58 @@ scib_summary_plot <- scib_summary |>
     label_mouse_brain = label_top_3(rank_mouse_brain),
     label_simulations_1_1 = label_top_3(rank_simulations_1_1),
     label_simulations_2 = label_top_3(rank_simulations_2),
-    package_label = label_top_3(-package_rank, ties.method = "min"),
-    paper_label = label_top_3(-paper_rank, ties.method = "min"),
-    time_label = label_top_3(-time_rank, ties.method = "min"),
-    memory_label = label_top_3(-memory_rank, ties.method = "min")
+    package_label = label_top_3(package_rank, ties.method = "min"),
+    paper_label = label_top_3(paper_rank, ties.method = "min"),
+    time_label = label_top_3(time_rank, ties.method = "min"),
+    memory_label = label_top_3(memory_rank, ties.method = "min")
+  ) |>
+  # scale rank columns between [0, 1] because `scale_column` is set to FALSE.
+  mutate_at(
+    c("rank_pancreas", "rank_lung_atlas", "rank_immune_cell_hum", "rank_immune_cell_hum_mou", "rank_mouse_brain", "rank_simulations_1_1", "rank_simulations_2", "package_rank", "paper_rank", "time_rank", "memory_rank"),
+    function(x) { scale_minmax(-x) }
   ) |>
   as.data.frame()
 
 glimpse(scib_summary_plot)
 
 ## ----summary-cols-------------------------------------------------------------
-column_info <- tribble(
-                           ~ id,                 ~ name,  ~ geom,       ~ group, ~ palette, ~ width, ~ legend, ~ hjust, ~ overlay,
-                           "id",                 "Rank",  "text",      "Method",        NA,       1,    FALSE,       0,     FALSE,
-                       "method",               "Method",  "text",      "Method",        NA,       5,    FALSE,       0,     FALSE,
-                   "output_img",               "Output", "image",      "Method",        NA,       1,    FALSE,     0.5,     FALSE,
-                     "features",             "Features",  "text",      "Method",        NA,       2,    FALSE,     0.5,     FALSE,
-                      "scaling",              "Scaling",  "text",      "Method",        NA,       1,     TRUE,     0.5,     FALSE,
-             "overall_pancreas",             "Pancreas",   "bar",         "RNA",   "blues",     1.5,     TRUE,      NA,     FALSE,
-               "label_pancreas",                     NA,  "text",         "RNA",        NA,      NA,    FALSE,     0.1,      TRUE,
-           "overall_lung_atlas",                 "Lung",   "bar",         "RNA",   "blues",     1.5,     TRUE,      NA,     FALSE,
-             "label_lung_atlas",                     NA,  "text",         "RNA",        NA,      NA,    FALSE,     0.1,      TRUE,
-      "overall_immune_cell_hum",       "Immune (human)",   "bar",         "RNA",   "blues",     1.5,     TRUE,      NA,     FALSE,
-        "label_immune_cell_hum",                     NA,  "text",         "RNA",        NA,      NA,    FALSE,     0.1,      TRUE,
-  "overall_immune_cell_hum_mou", "Immune (human/mouse)",   "bar",         "RNA",   "blues",     1.5,     TRUE,      NA,     FALSE,
-    "label_immune_cell_hum_mou",                     NA,  "text",         "RNA",        NA,      NA,    FALSE,     0.1,      TRUE,
-          "overall_mouse_brain",          "Mouse brain",   "bar",         "RNA",   "blues",     1.5,     TRUE,      NA,     FALSE,
-            "label_mouse_brain",                     NA,  "text",         "RNA",        NA,      NA,    FALSE,     0.1,      TRUE,
-      "overall_simulations_1_1",                "Sim 1",   "bar", "Simulations",  "greens",     1.5,     TRUE,      NA,     FALSE,
-        "label_simulations_1_1",                     NA,  "text", "Simulations",        NA,      NA,    FALSE,     0.1,      TRUE,
-        "overall_simulations_2",                "Sim 2",   "bar", "Simulations",  "greens",     1.5,     TRUE,      NA,     FALSE,
-          "label_simulations_2",                     NA,  "text", "Simulations",        NA,      NA,    FALSE,     0.1,      TRUE,
-                "package_score",              "Package",   "bar",   "Usability", "oranges",     1.5,     TRUE,      NA,     FALSE,
-                "package_label",                     NA,  "text",   "Usability",        NA,      NA,    FALSE,     0.1,      TRUE,
-                  "paper_score",                "Paper",   "bar",   "Usability", "oranges",     1.5,     TRUE,      NA,     FALSE,
-                  "paper_label",                     NA,  "text",   "Usability",        NA,      NA,    FALSE,     0.1,      TRUE,
-                   "time_score",                 "Time",   "bar", "Scalability",   "greys",     1.5,     TRUE,      NA,     FALSE,
-                   "time_label",                     NA,  "text", "Scalability",        NA,      NA,    FALSE,     0.1,      TRUE,
-                 "memory_score",               "Memory",   "bar", "Scalability",   "greys",     1.5,     TRUE,      NA,     FALSE,
-                 "memory_label",                     NA,  "text", "Scalability",        NA,      NA,    FALSE,     0.1,      TRUE,
-)
+column_info <- tribble(# tribble_start
+                              ~id,                   ~id_color,                   ~name,    ~geom,         ~group,                                                      ~options,
+                             "id",                          NA,                  "Rank",   "text",       "Method",                                               list(hjust = 0),
+                         "method",                          NA,                "Method",   "text",       "Method",                                    list(hjust = 0, width = 5),
+                     "output_img",                          NA,                "Output",  "image",       "Method",                                                        list(),
+                       "features",                  "features",              "Features",   "text",       "Method",                         list(palette = "features", width = 2),
+                        "scaling",                          NA,               "Scaling",   "text",       "Method",                                       list(fontface = "bold"),
+               "overall_pancreas",             "rank_pancreas",              "Pancreas",    "bar",          "RNA",    list(palette = "blues", width = 1.5, draw_outline = FALSE),
+                 "label_pancreas",                          NA,                      NA,   "text",          "RNA",                              list(hjust = .1, overlay = TRUE),
+             "overall_lung_atlas",           "rank_lung_atlas",                  "Lung",    "bar",          "RNA",    list(palette = "blues", width = 1.5, draw_outline = FALSE),
+               "label_lung_atlas",                          NA,                      NA,   "text",          "RNA",                              list(hjust = .1, overlay = TRUE),
+        "overall_immune_cell_hum",      "rank_immune_cell_hum",        "Immune (human)",    "bar",          "RNA",    list(palette = "blues", width = 1.5, draw_outline = FALSE),
+          "label_immune_cell_hum",                          NA,                      NA,   "text",          "RNA",                              list(hjust = .1, overlay = TRUE),
+    "overall_immune_cell_hum_mou",  "rank_immune_cell_hum_mou",  "Immune (human/mouse)",    "bar",          "RNA",    list(palette = "blues", width = 1.5, draw_outline = FALSE),
+      "label_immune_cell_hum_mou",                          NA,                      NA,   "text",          "RNA",                              list(hjust = .1, overlay = TRUE),
+            "overall_mouse_brain",          "rank_mouse_brain",           "Mouse brain",    "bar",          "RNA",    list(palette = "blues", width = 1.5, draw_outline = FALSE),
+              "label_mouse_brain",                          NA,                      NA,   "text",          "RNA",                              list(hjust = .1, overlay = TRUE),
+        "overall_simulations_1_1",      "rank_simulations_1_1",                 "Sim 1",    "bar",  "Simulations",   list(palette = "greens", width = 1.5, draw_outline = FALSE),
+          "label_simulations_1_1",                          NA,                      NA,   "text",  "Simulations",                              list(hjust = .1, overlay = TRUE),
+          "overall_simulations_2",        "rank_simulations_2",                 "Sim 2",    "bar",  "Simulations",   list(palette = "greens", width = 1.5, draw_outline = FALSE),
+            "label_simulations_2",                          NA,                      NA,   "text",  "Simulations",                              list(hjust = .1, overlay = TRUE),
+                  "package_score",              "package_rank",               "Package",    "bar",    "Usability",  list(palette = "oranges", width = 1.5, draw_outline = FALSE),
+                  "package_label",                          NA,                      NA,   "text",    "Usability",                              list(hjust = .1, overlay = TRUE),
+                    "paper_score",                "paper_rank",                 "Paper",    "bar",    "Usability",  list(palette = "oranges", width = 1.5, draw_outline = FALSE),
+                    "paper_label",                          NA,                      NA,   "text",    "Usability",                              list(hjust = .1, overlay = TRUE),
+                     "time_score",                 "time_rank",                  "Time",    "bar",  "Scalability",    list(palette = "greys", width = 1.5, draw_outline = FALSE),
+                     "time_label",                          NA,                      NA,   "text",  "Scalability",                              list(hjust = .1, overlay = TRUE),
+                   "memory_score",               "memory_rank",                "Memory",    "bar",  "Scalability",    list(palette = "greys", width = 1.5, draw_outline = FALSE),
+                   "memory_label",                          NA,                      NA,   "text",  "Scalability",                              list(hjust = .1, overlay = TRUE)
+) # tribble_end
 
 column_info
 
 ## ----summary-col-groups-------------------------------------------------------
 column_groups <- tribble(
         ~ group,     ~ palette,      ~ level1,
-       "Method",      "Method",      "Method",
+       "Method",       "black",      "Method",
           "RNA",       "blues",         "RNA",
   "Simulations",      "greens", "Simulations",
     "Usability",     "oranges",   "Usability",
@@ -118,31 +123,65 @@ row_info <- data.frame(id = scib_summary_plot$id, group = NA_character_)
 row_info
 
 ## ----summary-palettes---------------------------------------------------------
-palettes <- tribble(
-   ~ palette,                                     ~ colours,
-  "features",                             c("green", "red"),
-     "blues", grDevices::colorRampPalette(
-                rev(RColorBrewer::brewer.pal(9, "Blues"))
-              )(101),
-    "greens", grDevices::colorRampPalette(
-                rev(RColorBrewer::brewer.pal(9, "Greens"))
-              )(101),
-   "oranges", grDevices::colorRampPalette(
-                rev(RColorBrewer::brewer.pal(9, "Oranges"))
-              )(101),
-     "greys", grDevices::colorRampPalette(
-                rev(RColorBrewer::brewer.pal(9, "Greys"))
-              )(101)
+palettes <- list(
+  features = c(FULL = "#4c4c4c", HVG = "#006300"),
+  blues = "Blues",
+  greens = "Greens",
+  oranges = rev(RColorBrewer::brewer.pal(9, "Oranges")),
+  greys = "Greys",
+  black = c("black", "black")
+)
+
+## ----legends------------------------------------------------------------------
+legends <- list(
+  list(
+    title = "Scaling",
+    geom = "text",
+    values = c("Scaled", "Unscaled"),
+    labels = c("+", "-"),
+    label_width = .5
+  ),
+  list(
+    title = "RNA rank",
+    palette = "blues",
+    geom = "rect",
+    labels = c("20", " ", "10", " ", "1"),
+    size = c(1, 1, 1, 1, 1)
+  ),
+  list(
+    title = "Simulations rank",
+    palette = "greens",
+    geom = "rect",
+    labels = c("20", " ", "10", " ", "1"),
+    size = c(1, 1, 1, 1, 1)
+  ),
+  list(
+    title = "Usability rank",
+    palette = "oranges",
+    geom = "rect",
+    labels = c("20", " ", "10", " ", "1"),
+    size = c(1, 1, 1, 1, 1)
+  ),
+  list(
+    title = "Scalability rank",
+    palette = "greys",
+    geom = "rect",
+    labels = c("20", " ", "10", " ", "1"),
+    size = c(1, 1, 1, 1, 1)
+  )
 )
 
 ## ----summary-figure, fig.width=8, fig.height=8--------------------------------
 funky_heatmap(
-  scib_summary_plot,
+  data = scib_summary_plot,
   column_info = column_info,
   column_groups = column_groups,
   row_info = row_info,
   palettes = palettes,
-  scale_column = FALSE,
-  col_annot_offset = 4
+  legends = legends,
+  position_args = position_arguments(
+    col_annot_offset = 4
+  ),
+  scale_column = FALSE
 )
 
