@@ -25,6 +25,9 @@ verify_column_info <- function(column_info, data) {
     cli_alert_info("No column info was provided, assuming all columns in `data` are to be plotted.")
     column_info <- tibble(id = colnames(data))
   }
+
+  column_info <- if_list_to_tibble(column_info)
+
   assert_that(
     is.data.frame(column_info),
     column_info %has_name% "id",
@@ -70,7 +73,7 @@ verify_column_info <- function(column_info, data) {
   }
   check_geom <-
     (is.character(column_info$geom) | is.factor(column_info$geom)) &
-    column_info$geom %in% c("funkyrect", "circle", "rect", "bar", "pie", "text", "image")
+      column_info$geom %in% c("funkyrect", "circle", "rect", "bar", "pie", "text", "image")
   assert_that(
     all(check_geom),
     msg = paste0("Invalid geom types for columns: '", paste0(column_info$id[!check_geom], collapse = "', '"), "'")

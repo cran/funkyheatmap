@@ -51,15 +51,17 @@ verify_legends <- function(legends, palettes, column_info, data) {
   palettes_in_col_info <- na.omit(unique(column_info$palette))
   palettes_in_palette_names <- names(palettes)
   used_palettes <- intersect(palettes_in_col_info, palettes_in_palette_names)
-  
+
   palettes_in_legends <- sapply(legends, function(legend) {
     if (is.list(legend)) {
       legend$palette
     } else {
       NULL
     }
-  }) %>% unlist %>% unique
-  
+  }) %>%
+    unlist() %>%
+    unique()
+
   missing_palettes <- setdiff(used_palettes, palettes_in_legends)
 
   if (length(missing_palettes) > 0) {
@@ -118,28 +120,22 @@ verify_legends <- function(legends, palettes, column_info, data) {
     }
     assert_that(
       legend %has_name% "geom",
-      legend$geom %in% c("circle", "rect", "funkyrect", "text", "pie", "continuous", "discrete", "bar")
+      legend$geom %in% c("circle", "rect", "funkyrect", "text", "pie", "image", "continuous", "discrete", "bar")
     )
 
-    if (legend$geom == "bar") {
-      cli_alert_warning(paste0("Legend ", i, " has geom 'bar', which is not yet implemented. Disabling for now."))
-      legend$enabled <- FALSE
-      return(legend)
-    }
-    
     # check labels
     if (!legend %has_name% "labels") {
       cli_alert_info(paste0("Legend ", i, " did not contain labels, inferring from the geom."))
       if (legend$geom == "pie" && legend %has_name% "palette") {
         legend$labels <- names(palettes[[legend$palette]])
-      # } else if (legend$geom == "continuous") {
-      #   legend$labels <- c("min", "max")
-      # } else if (legend$geom == "discrete") {
-      #   legend$labels <- c("min", "max")
-      } else if (legend$geom %in% c("circle", "funkyrect", "rect")) {
+        # } else if (legend$geom == "continuous") {
+        #   legend$labels <- c("min", "max")
+        # } else if (legend$geom == "discrete") {
+        #   legend$labels <- c("min", "max")
+      } else if (legend$geom %in% c("circle", "funkyrect", "rect", "bar")) {
         legend$labels <- c("0", "", "0.2", "", "0.4", "", "0.6", "", "0.8", "", "1")
-      } else if (legend$geom == "text") {
-        cli_alert_warning(paste0("Legend ", i, " has geom 'text' but no specified labels, so disabling this legend for now."))
+      } else if (legend$geom == "text" || legend$geom == "image") {
+        cli_alert_warning(paste0("Legend ", i, " has geom ", legend$geom, " but no specified labels, so disabling this legend for now."))
         legend$enabled <- FALSE
         return(legend)
       }
@@ -151,7 +147,7 @@ verify_legends <- function(legends, palettes, column_info, data) {
     # check size
     if (legend$geom %in% c("circle", "funkyrect", "rect", "text")) {
       if (!legend %has_name% "size") {
-        if (legend$geom == "text") {
+        if (legend$geom == "text" || legend$geom == "image") {
           legend$size <- 3.88 # this appears to be the default of geom_text
         } else {
           cli_alert_info(paste0("Legend ", i, " did not contain size, inferring from the labels."))
@@ -166,7 +162,7 @@ verify_legends <- function(legends, palettes, column_info, data) {
     if (length(legend$size) == 1L) {
       legend$size <- rep(legend$size, length(legend$labels))
     }
-    
+
     # check colour/color
     if (legend %has_name% "colour") {
       legend$color <- legend$colour

@@ -1,10 +1,8 @@
-## ---- include = FALSE---------------------------------------------------------
+## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-# rerun this to update tribble formatting:
-# dynbenchmark::reformat_tribbles("vignettes/mtcars.Rmd")
 
 ## ----load-data----------------------------------------------------------------
 library(funkyheatmap)
@@ -21,7 +19,14 @@ data <- mtcars %>%
   mutate(type = c(rep("images/ice.png", 10), rep("images/electric.png", 10)))
 
 ## -----------------------------------------------------------------------------
-funky_heatmap(data)
+g <- funky_heatmap(data)
+
+## ----include=FALSE------------------------------------------------------------
+# set width and height for upcoming plot
+knitr::opts_chunk$set(fig.width = g$width, fig.height = g$height)
+
+## ----heatmap_preview----------------------------------------------------------
+g
 
 ## ----column-info--------------------------------------------------------------
 column_info <- tribble(
@@ -61,7 +66,7 @@ palettes <- tribble(
   "palette2",           grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(9, "Reds")[-8:-9]))(101)
 )
 
-## ----make-plot, fig.width=4.5, fig.height=10----------------------------------
+## ----make-plot----------------------------------------------------------------
 g <- funky_heatmap(
   data = data,
   column_info = column_info,
@@ -69,7 +74,11 @@ g <- funky_heatmap(
   row_info = row_info,
   row_groups = row_groups,
   palettes = palettes,
-  position_args = position_arguments(expand_xmax = 4)
+  position_args = position_arguments(
+    expand_xmax = 4,
+    col_annot_offset = 4
+  ),
+  add_abc = FALSE
 )
 
 ## ----include=FALSE------------------------------------------------------------

@@ -4,16 +4,17 @@
 \name{funkyheatmap-package}
 \alias{funkyheatmap}
 \alias{funkyheatmap-package}
-\title{funkyheatmap: Generating Funky Heatmaps for Data Frames}
+\title{Generating funky heatmaps for benchmarks}
 \description{
-Allows generating heatmap-like visualisations for benchmark data frames. Funky heatmaps can be fine-tuned by providing annotations of the columns and rows, which allows assigning multiple palettes or geometries or grouping rows and columns together in categories. Saelens et al. (2019) \doi{10.1038/s41587-019-0071-9}.
-
 Allows generating heatmap-likes visualisations for benchmark data
 frames. Funky heatmaps can be fine-tuned by providing annotations of the
 columns and rows, which allows assigning multiple palettes or geometries
 or grouping rows and columns together in categories.
 }
 \details{
+To learn more about funkyheatmap, please visit the
+\href{https://funkyheatmap.github.io/funkyheatmap/}{project page}.
+
 This package heavily depends on the functions provided by
 \href{https://ggplot2.tidyverse.org/}{\code{ggplot2}} and
 \href{https://ggforce.data-imaginist.com}{\code{ggforce}}.
@@ -28,11 +29,19 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Robrecht Cannoodt \email{rcannood@gmail.com} (\href{https://orcid.org/0000-0003-3641-729X}{ORCID}) (rcannood)
+\strong{Maintainer}: Robrecht Cannoodt \email{rcannood@gmail.com} (\href{https://orcid.org/0000-0003-3641-729X}{ORCID})
 
 Authors:
 \itemize{
-  \item Wouter Saelens \email{wouter.saelens@gmail.com} (\href{https://orcid.org/0000-0002-7114-6248}{ORCID}) (zouter)
+  \item Wouter Saelens \email{wouter.saelens@gmail.com} (\href{https://orcid.org/0000-0002-7114-6248}{ORCID})
+}
+
+Other contributors:
+\itemize{
+  \item Louise Deconinck \email{louise.deconinck@gmail.com} (\href{https://orcid.org/0000-0001-8100-6823}{ORCID}) [contributor]
+  \item Artuur Couckuyt (\href{https://orcid.org/0000-0001-7858-6521}{ORCID}) [contributor]
+  \item Nick Markov (\href{https://orcid.org/0000-0002-3659-4387}{ORCID}) [contributor]
+  \item Luke Zappia \email{luke@lazappi.id.au} (\href{https://orcid.org/0000-0001-7744-8565}{ORCID}) [contributor]
 }
 
 }

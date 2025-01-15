@@ -10,17 +10,16 @@
 #' plot, such as row and column dimensions, annotation details, and the
 #' expansion directions of the plot. See `position_arguments()` for more information.
 #' @param values Used as value for the 'image' and 'text' geom.
-#' 
+#'
 #' @noRd
 create_generic_geom_legend <- function(
-  title,
-  geom = c("circle", "rect", "funkyrect"),
-  labels,
-  size,
-  color,
-  position_args = position_arguments(),
-  label_hjust = .5
-) {
+    title,
+    geom = c("circle", "rect", "funkyrect"),
+    labels,
+    size,
+    color,
+    position_args = position_arguments(),
+    label_hjust = .5) {
   geom <- match.arg(geom)
 
   start_x <- 0
@@ -34,9 +33,9 @@ create_generic_geom_legend <- function(
     tibble(
       size_value = size,
       color_value = color,
-      xmin = - size * legend_size / 2,
+      xmin = -size * legend_size / 2,
       xmax = size * legend_size / 2,
-      ymin = - size * legend_size / 2,
+      ymin = -size * legend_size / 2,
       ymax = size * legend_size / 2,
       label = labels,
       colour = color,
@@ -104,18 +103,17 @@ create_generic_geom_legend <- function(
 }
 
 #' Create a funkyrect legend
-#' 
+#'
 #' @inheritParams create_generic_geom_legend
-#' 
+#'
 #' @noRd
 create_funkyrect_legend <- function(
-  title,
-  labels,
-  size,
-  color,
-  position_args = position_arguments(),
-  label_hjust = .5
-) {
+    title,
+    labels,
+    size,
+    color,
+    position_args = position_arguments(),
+    label_hjust = .5) {
   create_generic_geom_legend(
     title = title,
     geom = "funkyrect",
@@ -128,18 +126,17 @@ create_funkyrect_legend <- function(
 }
 
 #' Create a rect legend
-#' 
+#'
 #' @inheritParams create_generic_geom_legend
-#' 
+#'
 #' @noRd
 create_rect_legend <- function(
-  title,
-  labels,
-  size,
-  color,
-  position_args = position_arguments(),
-  label_hjust = .5
-) {
+    title,
+    labels,
+    size,
+    color,
+    position_args = position_arguments(),
+    label_hjust = .5) {
   create_generic_geom_legend(
     title = title,
     geom = "rect",
@@ -152,18 +149,17 @@ create_rect_legend <- function(
 }
 
 #' Create a circle legend
-#' 
+#'
 #' @inheritParams create_generic_geom_legend
-#' 
+#'
 #' @noRd
 create_circle_legend <- function(
-  title,
-  labels,
-  size,
-  color,
-  position_args = position_arguments(),
-  label_hjust = .5
-) {
+    title,
+    labels,
+    size,
+    color,
+    position_args = position_arguments(),
+    label_hjust = .5) {
   create_generic_geom_legend(
     title = title,
     geom = "circle",
@@ -177,7 +173,7 @@ create_circle_legend <- function(
 
 #' Create a pie legend
 #' @inheritParams create_generic_geom_legend
-#' 
+#'
 #' @noRd
 create_pie_legend <- function(
   title,
@@ -272,31 +268,116 @@ create_pie_legend <- function(
 }
 
 
+create_bar_legend <- function(
+  title,
+  labels,
+  size,
+  color,
+  position_args = position_arguments(),
+  label_hjust = .5) {
 
+  legend_width <- 5
+  legend_height <- 1
+  legend_space <- .2
+
+  # title data
+  start_x <- 0
+  start_y <- 0
+  title_df <-
+    tibble(
+      width = legend_width,
+      height = legend_height,
+      xmin = start_x,
+      xmax = start_x + legend_width,
+      ymin = start_y - 1.5,
+      ymax = start_y - .5,
+      label_value = title,
+      hjust = 0,
+      vjust = 1,
+      fontface = "bold",
+      colour = "black"
+    )
+
+  width <- rep((legend_width / length(labels)) - legend_space, length(labels))
+  height <- rep(legend_height, length(labels))
+
+  # label data
+  label_df <-
+    tibble(
+      label_value = labels,
+      width = width,
+      height = height,
+      hjust = label_hjust,
+      vjust = 0,
+      fontface = "plain",
+      colour = "black"
+    ) %>% mutate(
+      xmin = cumsum(width + legend_space) - width - legend_space,
+      xmin = .data$xmin - min(.data$xmin),
+      xmax = .data$xmin + width,
+      ymin = -3.5,
+      ymax = .data$ymin + height
+    )
+
+  # bar data
+  bar_data <-
+    tibble(
+      colour = list(color),
+      xmin = start_x,
+      xmax = start_x + legend_width,
+      ymin = start_y - 2.5,
+      ymax = start_y - 2.5 + legend_height,
+      alpha = 0,
+      border_colour = "black",
+      linewidth = .25,
+      i = NA
+    )
+
+  # should generate a bunch of small rectangles with different colors
+  n_col <- 500
+  rect_data <- 
+    tibble(
+      xmin = start_x + seq(0, legend_width, length.out = n_col),
+      xmax = start_x + seq(0, legend_width, length.out = n_col) + legend_width / n_col,
+      ymin = start_y - 2.5,
+      ymax = start_y - 2.5 + legend_height,
+      i = seq_len(n_col),
+      colour = list(color),
+      alpha = 1,
+      border_colour = NA,
+      linewidth = 0
+    )
+
+  geom_positions <- lst(
+    "text_data" = rbind(title_df, label_df),
+    "bar_data" = rbind(bar_data, rect_data)
+  )
+
+  compose_ggplot(geom_positions, list())
+}
 
 
 
 #' Create a text legend
 #' @inheritParams create_generic_geom_legend
-#' 
+#'
 #' @noRd
-#' 
+#'
 #' @examples
 #' title <- "Greys"
 #' labels <- c("A", "B", "C")
 #' values <- c("One", "Two", "Three")
 #' create_text_legend(title, values = values, labels = labels)
 create_text_legend <- function(
-  title,
-  labels,
-  size,
-  color,
-  values,
-  position_args = position_arguments(),
-  # TODO: if we could determine the width of the labels, this would not be needed
-  label_width = 1,
-  value_width = 2
-) {
+    title,
+    labels,
+    size,
+    color,
+    values,
+    position_args = position_arguments(),
+    # TODO: if we could determine the width of the labels, this would not be needed
+    label_width = 1,
+    value_width = 2) {
   start_x <- 0
   start_y <- 0
   row_height <- position_args$row_height
@@ -309,7 +390,7 @@ create_text_legend <- function(
       size = size,
       vjust = .5,
       hjust = 0,
-      lab_y = - row_height * (seq_along(labels) - 1)
+      lab_y = -row_height * (seq_along(labels) - 1)
     )
 
   text_data <- bind_rows(
@@ -361,16 +442,86 @@ create_text_legend <- function(
 
 
 
-# #' Create an image legend
-# #' @inheritParams create_generic_geom_legend
-# create_image_legend <- function(
-#   title,
-#   labels,
-#   size,
-#   color,
-#   values,
-#   position_args = position_arguments()
-# ) {
-#   warning("Image legend not yet implemented.")
-#   NULL
-# }
+#' Create an image legend
+#' @inheritParams create_generic_geom_legend
+#' @noRd
+create_image_legend <- function(
+  title,
+  labels,
+  size,
+  color,
+  values,
+  position_args = position_arguments(),
+  label_width = 1,
+  value_width = 2
+) {
+
+  start_x <- 0
+  start_y <- 0
+  row_height <- position_args$row_height
+
+  data_df <-
+    tibble(
+      name = labels,
+      value = values,
+      colour = color,
+      size = size,
+      vjust = .5,
+      hjust = 0,
+      lab_y = -row_height * (seq_along(labels) - 1)
+    )
+
+  text_data <- bind_rows(
+    tibble(
+      x = start_x,
+      y = start_y - 1,
+      label_value = title,
+      hjust = 0,
+      vjust = 1,
+      fontface = "bold",
+      colour = "black"
+    ),
+    data_df %>%
+      transmute(
+        x = start_x + 2 * .5 + label_width,
+        y = start_y - 2 + .data$lab_y,
+        label_value = as.character(.data$value),
+        .data$vjust,
+        .data$hjust,
+        .data$colour
+      )
+  ) %>%
+    mutate(
+      # todo: need to find a better width
+      xwidth = 2 * .5 + value_width + label_width,
+      yheight = row_height,
+      xmin = .data$x - .data$xwidth * .data$hjust,
+      xmax = .data$x + .data$xwidth * (1 - .data$hjust),
+      ymin = .data$y - .data$yheight * .data$vjust,
+      ymax = .data$y + .data$yheight * (1 - .data$vjust)
+    )
+
+  size <- min(2 * .5 + label_width, row_height)
+  image_data <- data_df %>%
+    transmute(
+      path = .data$name,
+      vjust = 0.5,
+      hjust = 1,
+      lab_y = -row_height * (seq_along(labels) - 1),
+      x = start_x + 2 * .5 + label_width,
+      y = start_y - 2 + .data$lab_y,
+      width = 2 * .5 + label_width,
+      height = row_height,
+      xmin = .data$x - .data$width * .data$hjust,
+      ymin = .data$y - .data$height * .data$vjust,
+
+    )
+
+  geom_positions <- lst(
+    "img_data" = image_data,
+    "text_data" = text_data
+  )
+
+  compose_ggplot(geom_positions, list())
+
+}
